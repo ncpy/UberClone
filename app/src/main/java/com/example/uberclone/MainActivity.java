@@ -9,13 +9,16 @@ import com.parse.ParseAnonymousUtils;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 import com.parse.SignUpCallback;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -40,8 +43,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         ParseInstallation.getCurrentInstallation().saveInBackground();
         if (ParseUser.getCurrentUser() != null) {
-            //transition
-            ParseUser.logOut();
+            transitionToPassengerActivity();
+            //ParseUser.logOut();
         }
 
         btnSignUpLogin = findViewById(R.id.btn_signup);
@@ -93,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         public void done(ParseException e) {
                             if (e == null) {
                                 Toast.makeText(MainActivity.this, "Signed Up!", Toast.LENGTH_SHORT).show();
+                                transitionToPassengerActivity();
                             }
                         }
                     });
@@ -102,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         public void done(ParseUser user, ParseException e) {
                             if (user != null && e == null) {
                                 Toast.makeText(MainActivity.this, "User Logged In", Toast.LENGTH_SHORT).show();
-
+                                transitionToPassengerActivity();
                             }
                         }
                     });
@@ -118,7 +122,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     Toast.makeText(MainActivity.this, "We have an Anonymous Userf", Toast.LENGTH_SHORT).show();
 
                                     user.put("as", edtDriverOrPaseenger.getText().toString());
-                                    user.saveInBackground();
+                                    user.saveInBackground(new SaveCallback() {
+                                        @Override
+                                        public void done(ParseException e) {
+                                            transitionToPassengerActivity();
+                                        }
+                                    });
+                                } else {
+                                    Toast.makeText(MainActivity.this, "Error: " + e, Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
@@ -158,5 +169,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return super.onOptionsItemSelected(item);
     }
 
+    private void transitionToPassengerActivity() {
+        if (ParseUser.getCurrentUser() != null) {
+            if (ParseUser.getCurrentUser().get("as").equals("Passenger")) {
+                startActivity(new Intent(MainActivity.this, PassengerActivity_Map.class));
+            }
+        }
+    }
 
+    public void constraintKeyboard(View v) {
+        try {
+            InputMethodManager iMM = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            iMM.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
