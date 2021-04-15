@@ -12,6 +12,9 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -19,23 +22,49 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.parse.DeleteCallback;
+import com.parse.FindCallback;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
-public class PassengerActivity_Map extends FragmentActivity implements OnMapReadyCallback {
+import java.util.List;
+
+public class PassengerActivity_Map extends FragmentActivity implements OnMapReadyCallback, View.OnClickListener {
 
     private GoogleMap mMap;
     private LocationManager locationManager;
     private LocationListener locationListener;
+
+    private Button btnRequestCar;
+    private boolean isUberCancelled = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_passenger__map);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        btnRequestCar = findViewById(R.id.btnRequestCar);
+        btnRequestCar.setOnClickListener(this);
 
+        ParseQuery<ParseObject> carRequestQuery = ParseQuery.getQuery("RequestCar");
+        carRequestQuery.whereEqualTo("username", ParseUser.getCurrentUser().getUsername());
+        carRequestQuery.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (objects.size() > 0 && e == null) {
+                    isUberCancelled = false;
+                    btnRequestCar.setText(R.string.cancel_uber_order);
+                }
+            }
+        });
     }
 
     /**
@@ -102,5 +131,61 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
         mMap.addMarker(new MarkerOptions()
                 .position(passengerLocation)
                 .title("You are here!!!"));
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (isUberCancelled) {  // means request uber and send my data
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                Location passengerCurrentLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+                if (passengerCurrentLocation != null) {
+
+                    ParseObject requestCar = new ParseObject("RequestCar");
+                    requestCar.put("username", ParseUser.getCurrentUser().getUsername());
+
+                    ParseGeoPoint userLocation = new ParseGeoPoint(passengerCurrentLocation.getLatitude(), passengerCurrentLocation.getLongitude());
+                    requestCar.put("passengerLocation", userLocation);
+
+                    requestCar.saveInBackground(new SaveCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            if (e == null) {
+                                Toast.makeText(PassengerActivity_Map.this, "A car request is sent.", Toast.LENGTH_SHORT).show();
+                                btnRequestCar.setText(R.string.cancel_uber_order);
+                                isUberCancelled = false;
+                            }
+                        }
+                    });
+
+                } else {
+                    Toast.makeText(this, "Unknown Error. Something went wrong!!!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        } else { // means cancel the order
+            ParseQuery<ParseObject> carRequestQuery = ParseQuery.getQuery("RequestCar");
+            carRequestQuery.whereEqualTo("username", ParseUser.getCurrentUser().getUsername());
+            carRequestQuery.findInBackground(new FindCallback<ParseObject>() {
+                @Override
+                public void done(List<ParseObject> requestList, ParseException e) {
+                    if (requestList.size() > 0 && e == null) {
+                        isUberCancelled = true;
+                        btnRequestCar.setText(R.string.request_uber);
+
+                        for (ParseObject uberRequest : requestList) {
+                            uberRequest.deleteInBackground(new DeleteCallback() {
+                                @Override
+                                public void done(ParseException e) {
+                                    if (e == null) {
+                                        Toast.makeText(PassengerActivity_Map.this, "Request is deleted!", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }
     }
 }

@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.parse.LogInCallback;
-import com.parse.Parse;
 import com.parse.ParseAnonymousUtils;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
@@ -33,8 +32,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private State state;
     private Button btnSignUpLogin, btnOneTimeLogin;
-    private RadioButton driverRAdioButton, passengerRadioButton;
-    private EditText edtUserName, edtPassword, edtDriverOrPaseenger;
+    private RadioButton driverRadioButton, passengerRadioButton;
+    private EditText edtUserName, edtPassword, edtDriverOrPassenger;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,18 +52,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnOneTimeLogin.setOnClickListener(this);
 
         passengerRadioButton = findViewById(R.id.rd_btn_psg);
-        driverRAdioButton = findViewById(R.id.rd_btn_drv);
+        driverRadioButton = findViewById(R.id.rd_btn_drv);
 
         edtUserName = findViewById(R.id.ed_username);
         edtPassword = findViewById(R.id.ed_password);
-        edtDriverOrPaseenger = findViewById(R.id.ed_D_P);
+        edtDriverOrPassenger = findViewById(R.id.ed_D_P);
 
         state = State.SIGNUP;
-
-        if (ParseUser.getCurrentUser() != null) {
-            // Transition!
-
-        }
 
     }
 
@@ -72,10 +66,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btn_signup:
+            case R.id.btn_signup: {
                 if (state == State.SIGNUP) {
-                    if (!driverRAdioButton.isChecked() && !passengerRadioButton.isChecked()) {
-                        Toast.makeText(this, "Are yo a driver or a passenger?", Toast.LENGTH_SHORT).show();
+                    if (!driverRadioButton.isChecked() && !passengerRadioButton.isChecked()) {
+                        Toast.makeText(this, "Are you a driver or a passenger?", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
@@ -86,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     ParseUser appUser = new ParseUser();
                     appUser.setUsername(edtUserName.getText().toString());
                     appUser.setPassword(edtPassword.getText().toString());
-                    if (driverRAdioButton.isChecked())
+                    if (driverRadioButton.isChecked())
                         appUser.put("as", "Driver");
                     else if (passengerRadioButton.isChecked())
                         appUser.put("as", "Passenger");
@@ -112,16 +106,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     });
                 }
                 break;
-            case R.id.btn_onetime:
-                if (edtDriverOrPaseenger.getText().toString().equals("Driver") || edtDriverOrPaseenger.getText().toString().equals("Passenger")) {
+            }
+            case R.id.btn_onetime: {
+                if (edtDriverOrPassenger.getText().toString().equals("Driver") || edtDriverOrPassenger.getText().toString().equals("Passenger")) {
                     if (ParseUser.getCurrentUser() == null) {
                         ParseAnonymousUtils.logIn(new LogInCallback() {
                             @Override
                             public void done(ParseUser user, ParseException e) {
                                 if (user != null && e == null) {
-                                    Toast.makeText(MainActivity.this, "We have an Anonymous Userf", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(MainActivity.this, "We have an Anonymous User", Toast.LENGTH_SHORT).show();
 
-                                    user.put("as", edtDriverOrPaseenger.getText().toString());
+                                    user.put("as", edtDriverOrPassenger.getText().toString());
                                     user.saveInBackground(new SaveCallback() {
                                         @Override
                                         public void done(ParseException e) {
@@ -136,10 +131,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
                 break;
+            }
         }
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
