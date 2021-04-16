@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -24,6 +25,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
+import com.parse.LogOutCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -40,7 +42,7 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
     private LocationManager locationManager;
     private LocationListener locationListener;
 
-    private Button btnRequestCar;
+    private Button btnRequestCar, btnLogOutFromPassenger;
     private boolean isUberCancelled = true;
 
     @Override
@@ -53,6 +55,8 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
 
         btnRequestCar = findViewById(R.id.btnRequestCar);
         btnRequestCar.setOnClickListener(this);
+        btnLogOutFromPassenger = findViewById(R.id.btnLogOutFromPassenger);
+        btnLogOutFromPassenger.setOnClickListener(this);
 
         ParseQuery<ParseObject> carRequestQuery = ParseQuery.getQuery("RequestCar");
         carRequestQuery.whereEqualTo("username", ParseUser.getCurrentUser().getUsername());
@@ -133,59 +137,76 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
                 .title("You are here!!!"));
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
-        if (isUberCancelled) {  // means request uber and send my data
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-                Location passengerCurrentLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        switch (v.getId()){
+            case R.id.btnRequestCar: {
+                if (isUberCancelled) {  // means request uber and send my data
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+                        Location passengerCurrentLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-                if (passengerCurrentLocation != null) {
+                        if (passengerCurrentLocation != null) {
 
-                    ParseObject requestCar = new ParseObject("RequestCar");
-                    requestCar.put("username", ParseUser.getCurrentUser().getUsername());
+                            ParseObject requestCar = new ParseObject("RequestCar");
+                            requestCar.put("username", ParseUser.getCurrentUser().getUsername());
 
-                    ParseGeoPoint userLocation = new ParseGeoPoint(passengerCurrentLocation.getLatitude(), passengerCurrentLocation.getLongitude());
-                    requestCar.put("passengerLocation", userLocation);
+                            ParseGeoPoint userLocation = new ParseGeoPoint(passengerCurrentLocation.getLatitude(), passengerCurrentLocation.getLongitude());
+                            requestCar.put("passengerLocation", userLocation);
 
-                    requestCar.saveInBackground(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            if (e == null) {
-                                Toast.makeText(PassengerActivity_Map.this, "A car request is sent.", Toast.LENGTH_SHORT).show();
-                                btnRequestCar.setText(R.string.cancel_uber_order);
-                                isUberCancelled = false;
-                            }
-                        }
-                    });
-
-                } else {
-                    Toast.makeText(this, "Unknown Error. Something went wrong!!!", Toast.LENGTH_SHORT).show();
-                }
-            }
-        } else { // means cancel the order
-            ParseQuery<ParseObject> carRequestQuery = ParseQuery.getQuery("RequestCar");
-            carRequestQuery.whereEqualTo("username", ParseUser.getCurrentUser().getUsername());
-            carRequestQuery.findInBackground(new FindCallback<ParseObject>() {
-                @Override
-                public void done(List<ParseObject> requestList, ParseException e) {
-                    if (requestList.size() > 0 && e == null) {
-                        isUberCancelled = true;
-                        btnRequestCar.setText(R.string.request_uber);
-
-                        for (ParseObject uberRequest : requestList) {
-                            uberRequest.deleteInBackground(new DeleteCallback() {
+                            requestCar.saveInBackground(new SaveCallback() {
                                 @Override
                                 public void done(ParseException e) {
                                     if (e == null) {
-                                        Toast.makeText(PassengerActivity_Map.this, "Request is deleted!", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(PassengerActivity_Map.this, "A car request is sent.", Toast.LENGTH_SHORT).show();
+                                        btnRequestCar.setText(R.string.cancel_uber_order);
+                                        isUberCancelled = false;
                                     }
                                 }
                             });
+
+                        } else {
+                            Toast.makeText(this, "Unknown Error. Something went wrong!!!", Toast.LENGTH_SHORT).show();
                         }
                     }
+                } else { // means cancel the order
+                    ParseQuery<ParseObject> carRequestQuery = ParseQuery.getQuery("RequestCar");
+                    carRequestQuery.whereEqualTo("username", ParseUser.getCurrentUser().getUsername());
+                    carRequestQuery.findInBackground(new FindCallback<ParseObject>() {
+                        @Override
+                        public void done(List<ParseObject> requestList, ParseException e) {
+                            if (requestList.size() > 0 && e == null) {
+                                isUberCancelled = true;
+                                btnRequestCar.setText(R.string.request_uber);
+
+                                for (ParseObject uberRequest : requestList) {
+                                    uberRequest.deleteInBackground(new DeleteCallback() {
+                                        @Override
+                                        public void done(ParseException e) {
+                                            if (e == null) {
+                                                Toast.makeText(PassengerActivity_Map.this, "Request is deleted!", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    });
                 }
-            });
+                break;
+            }
+            case R.id.btnLogOutFromPassenger: {
+                Toast.makeText(PassengerActivity_Map.this, ParseUser.getCurrentUser().getUsername() + " is logged out!", Toast.LENGTH_SHORT).show();
+                ParseUser.logOutInBackground(new LogOutCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if (e == null) {
+                            finish();
+                        }
+                    }
+                });
+            }
         }
     }
 }

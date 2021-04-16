@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         ParseInstallation.getCurrentInstallation().saveInBackground();
         if (ParseUser.getCurrentUser() != null) {
-            transitionToPassengerActivity();
+            transitionToActivity();
             //ParseUser.logOut();
         }
 
@@ -85,12 +85,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     else if (passengerRadioButton.isChecked())
                         appUser.put("as", "Passenger");
 
+
+
+                    /**
+                     * driver veya passenger olarak login yapılan kullanıcının farklı olan driver/pasng olarak giriş yapması engellenmeli değil mi?
+                      */
                     appUser.signUpInBackground(new SignUpCallback() {
                         @Override
                         public void done(ParseException e) {
                             if (e == null) {
                                 Toast.makeText(MainActivity.this, "Signed Up!", Toast.LENGTH_SHORT).show();
-                                transitionToPassengerActivity();
+                                transitionToActivity();
                             }
                         }
                     });
@@ -99,8 +104,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         @Override
                         public void done(ParseUser user, ParseException e) {
                             if (user != null && e == null) {
-                                Toast.makeText(MainActivity.this, "User Logged In", Toast.LENGTH_SHORT).show();
-                                transitionToPassengerActivity();
+                                Toast.makeText(MainActivity.this, "Logged In", Toast.LENGTH_SHORT).show();
+                                transitionToActivity();
                             }
                         }
                     });
@@ -120,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     user.saveInBackground(new SaveCallback() {
                                         @Override
                                         public void done(ParseException e) {
-                                            transitionToPassengerActivity();
+                                            transitionToActivity();
                                         }
                                     });
                                 } else {
@@ -150,11 +155,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     state = State.LOGIN;
                     item.setTitle("Sign Up");
                     btnSignUpLogin.setText("Log In");
+                    driverRadioButton.setEnabled(false);
+                    passengerRadioButton.setEnabled(false);
 
                 } else if (state == State.LOGIN) {
                     state = State.SIGNUP;
                     item.setTitle("Log In");
                     btnSignUpLogin.setText("Sign Up");
+                    driverRadioButton.setEnabled(true);
+                    passengerRadioButton.setEnabled(true);
                 }
 
                 break;
@@ -163,10 +172,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return super.onOptionsItemSelected(item);
     }
 
-    private void transitionToPassengerActivity() {
+    private void transitionToActivity() {
         if (ParseUser.getCurrentUser() != null) {
             if (ParseUser.getCurrentUser().get("as").equals("Passenger")) {
                 startActivity(new Intent(MainActivity.this, PassengerActivity_Map.class));
+            }
+            else if (ParseUser.getCurrentUser().get("as").equals("Driver")) {
+                startActivity(new Intent(MainActivity.this, DriverRequestListActivity.class));
             }
         }
     }

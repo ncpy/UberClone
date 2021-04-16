@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
@@ -12,12 +11,23 @@
         android:layout_height="match_parent"
         tools:context=".PassengerActivity_Map">
 
-        <Button
-            android:id="@+id/btnRequestCar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/request_uber" />
-
     </fragment>
 
-</LinearLayout>
+    <Button
+        android:id="@+id/btnRequestCar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="@string/request_uber" />
+
+    <Button
+        android:id="@+id/btnLogOutFromPassenger"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:background="#FA1302"
+        android:textColor="@color/white"
+        android:text="logout" />
+
+
+</RelativeLayout>
