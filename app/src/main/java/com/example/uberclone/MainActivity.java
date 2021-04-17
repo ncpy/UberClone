@@ -100,6 +100,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     });
                 } else if (state == State.LOGIN) {
+                    if (edtUserName.getText().toString().equals("") || edtPassword.getText().toString().equals("")) {
+                        Toast.makeText(this, "Please fill the blanks area", Toast.LENGTH_SHORT).show();
+                    }
+
                     ParseUser.logInInBackground(edtUserName.getText().toString(), edtPassword.getText().toString(), new LogInCallback() {
                         @Override
                         public void done(ParseUser user, ParseException e) {

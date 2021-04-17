@@ -104,13 +104,28 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
             }
         };
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+        if (Build.VERSION.SDK_INT < 23) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
-        Location currentPassengerLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        updateCameraPassengerLocation(currentPassengerLocation);
+        } else if (Build.VERSION.SDK_INT >= 23) {
+            if (ContextCompat.checkSelfPermission(PassengerActivity_Map.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(PassengerActivity_Map.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1000);
+
+            } else {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+                Location currentPassengerLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                updateCameraPassengerLocation(currentPassengerLocation);
+            }
+        }
+
+//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+//            return;
+//        }
+//        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+//
+//        Location currentPassengerLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+//        updateCameraPassengerLocation(currentPassengerLocation);
     }
 
     @Override
@@ -123,8 +138,8 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
             }
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
-            Location currentPassengerLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            updateCameraPassengerLocation(currentPassengerLocation);
+            //Location currentPassengerLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            //updateCameraPassengerLocation(currentPassengerLocation);
         }
     }
 
