@@ -13,6 +13,7 @@ import com.parse.SignUpCallback;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -59,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         edtDriverOrPassenger = findViewById(R.id.ed_D_P);
 
         state = State.SIGNUP;
+        btnSignUpLogin.setBackgroundColor(Color.GREEN);
+
 
     }
 
@@ -159,6 +162,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     state = State.LOGIN;
                     item.setTitle("Sign Up");
                     btnSignUpLogin.setText("Log In");
+                    btnSignUpLogin.setBackgroundColor(Color.YELLOW);
                     driverRadioButton.setEnabled(false);
                     passengerRadioButton.setEnabled(false);
 
@@ -166,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     state = State.SIGNUP;
                     item.setTitle("Log In");
                     btnSignUpLogin.setText("Sign Up");
+                    btnSignUpLogin.setBackgroundColor(Color.GREEN);
                     driverRadioButton.setEnabled(true);
                     passengerRadioButton.setEnabled(true);
                 }

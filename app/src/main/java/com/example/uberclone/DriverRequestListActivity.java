@@ -13,6 +13,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,6 +30,7 @@ import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,25 +70,7 @@ public class DriverRequestListActivity extends AppCompatActivity implements View
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         if (Build.VERSION.SDK_INT < 23 || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-            locationListener = new LocationListener() {
-                @Override
-                public void onLocationChanged(@NonNull Location location) {
-                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-                    //updateRequestListView(location);
-                }
-
-                @Override
-                public void onStatusChanged(String provider, int status, Bundle extras) { }
-
-                @Override
-                public void onProviderEnabled(@NonNull String provider) { }
-
-                @Override
-                public void onProviderDisabled(@NonNull String provider) { }
-
-            };
-
+            initializeLocationListener();
         }
 
         listView.setOnItemClickListener(this);
@@ -118,11 +102,13 @@ public class DriverRequestListActivity extends AppCompatActivity implements View
     public void onClick(View v) {
 
         if (Build.VERSION.SDK_INT < 23) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
             Location currentDriverLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             updateRequestListView(currentDriverLocation);
 
-        } else if (Build.VERSION.SDK_INT >= 23) {
-
+        } else {
             if (ContextCompat.checkSelfPermission(DriverRequestListActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(DriverRequestListActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1000);
 
@@ -131,6 +117,7 @@ public class DriverRequestListActivity extends AppCompatActivity implements View
                 Location currentDriverLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 updateRequestListView(currentDriverLocation);
             }
+
         }
 
 //        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
@@ -146,26 +133,28 @@ public class DriverRequestListActivity extends AppCompatActivity implements View
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == 1000 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                initializeLocationListener();
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
-
-            //Location currentDriverLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            //updateRequestListView(currentDriverLocation);
+                Location currentDriverLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                updateRequestListView(currentDriverLocation);
+            }
         }
     }
 
     private void updateRequestListView(Location dlocation) {
         if (dlocation != null) {
+            saveDriverLocationToParse(dlocation);
 
             ParseGeoPoint driverCurrentLocation = new ParseGeoPoint(dlocation.getLatitude(), dlocation.getLongitude());
             ParseQuery<ParseObject> requestCarQuery = ParseQuery.getQuery("RequestCar");
             requestCarQuery.whereNear("passengerLocation", driverCurrentLocation);
-            requestCarQuery.whereDoesNotExist("driverOfMe");
+            //requestCarQuery.whereDoesNotExist("driverOfMe");
             requestCarQuery.findInBackground(new FindCallback<ParseObject>() {
                 @Override
                 public void done(List<ParseObject> objects, ParseException e) {
                     if (e == null) {
-                        if (objects.size() > 0 && e == null) {
+                        if (objects.size() > 0) {
 
                             if (nearbyDriveRequests.size() > 0)
                                 nearbyDriveRequests.clear();
@@ -215,5 +204,41 @@ public class DriverRequestListActivity extends AppCompatActivity implements View
                 startActivity(intent);
             }
         }
+    }
+
+    private void initializeLocationListener() {
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(@NonNull Location location) {
+                if (ActivityCompat.checkSelfPermission(DriverRequestListActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(DriverRequestListActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) { }
+
+            @Override
+            public void onProviderEnabled(@NonNull String provider) { }
+
+            @Override
+            public void onProviderDisabled(@NonNull String provider) { }
+
+        };
+    }
+
+    private void saveDriverLocationToParse(Location location) {
+        ParseUser driver = ParseUser.getCurrentUser();
+        ParseGeoPoint driverLocation = new ParseGeoPoint(location.getLatitude(), location.getLongitude());
+        driver.put("driverLocation", driverLocation);
+        driver.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    Toast.makeText(DriverRequestListActivity.this, "Location Saved", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 }

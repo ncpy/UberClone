@@ -13,12 +13,13 @@
 
     </fragment>
 
-    <Button
-        android:id="@+id/btnRequestCar"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/tx_2"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:text="@string/request_uber" />
+        android:layout_centerInParent="true"
+        android:background="#78CD65"
+        android:text="" />
 
     <Button
         android:id="@+id/btnLogOutFromPassenger"
@@ -28,6 +29,13 @@
         android:background="#FA1302"
         android:textColor="@color/white"
         android:text="logout" />
+
+    <Button
+        android:id="@+id/btnRequestCar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="@string/request_uber" />
 
 
 </RelativeLayout>

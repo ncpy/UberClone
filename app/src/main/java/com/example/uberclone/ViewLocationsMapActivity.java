@@ -56,6 +56,8 @@ public class ViewLocationsMapActivity extends FragmentActivity implements OnMapR
                     public void done(List<ParseObject> objects, ParseException e) {
                         if (objects.size() > 0 && e == null) {
                             for (ParseObject uberRequest : objects) {
+
+                                uberRequest.put("requestAccepted", true);
                                 uberRequest.put("driverOfMe", ParseUser.getCurrentUser().getUsername());
                                 uberRequest.saveInBackground(new SaveCallback() {
                                     @Override
@@ -95,13 +97,7 @@ public class ViewLocationsMapActivity extends FragmentActivity implements OnMapR
         mMap = googleMap;
 
         LatLng dLocation = new LatLng(getIntent().getDoubleExtra("dLatitude", 0), getIntent().getDoubleExtra("dLongitude", 0));
-        //mMap.addMarker(new MarkerOptions().position(dLocation).title("Driver Location"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(dLocation, 12));
-
         LatLng pLocation = new LatLng(getIntent().getDoubleExtra("pLatitude", 0), getIntent().getDoubleExtra("pLongitude", 0));
-//        mMap.addMarker(new MarkerOptions().position(pLocation).title("Passenger Location"));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pLocation, 10));
-
 
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         Marker driverMarker = mMap.addMarker(new MarkerOptions().position(dLocation).title("Driver Location"));
@@ -116,7 +112,7 @@ public class ViewLocationsMapActivity extends FragmentActivity implements OnMapR
         }
 
         LatLngBounds bounds = builder.build();
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 0);
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, getResources().getDisplayMetrics().widthPixels, getResources().getDisplayMetrics().heightPixels, 12);
         mMap.animateCamera(cameraUpdate);
     }
 }
