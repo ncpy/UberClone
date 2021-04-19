@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawerlayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:onClick="constraintKeyboard"
-        android:padding="10dp"
-        tools:context=".MainActivity">
-
+        android:padding="10dp" >
 
         <ImageView
             android:id="@+id/imageView"
@@ -37,8 +36,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:hint="Please enter your password.."
+            android:inputType="textPassword"
             app:layout_constraintTop_toBottomOf="@+id/ed_username"
-            android:hint="Please enter your password.." />
+            tools:layout_editor_absoluteX="10dp" />
 
         <RadioGroup
             android:id="@+id/rd_grp"
@@ -107,12 +108,16 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navView"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        app:menu="@menu/menu_nav_drawer"
+        app:headerLayout="@layout/navg_header"
         android:fitsSystemWindows="true" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
+
 

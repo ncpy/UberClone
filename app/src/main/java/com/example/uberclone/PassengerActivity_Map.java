@@ -229,13 +229,13 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
                 break;
             }
             case R.id.btnLogOutFromPassenger: {
+                tt.cancel();
+                t.cancel();
                 Toast.makeText(PassengerActivity_Map.this, ParseUser.getCurrentUser().getUsername() + " is logged out!", Toast.LENGTH_SHORT).show();
                 ParseUser.logOutInBackground(new LogOutCallback() {
                     @Override
                     public void done(ParseException e) {
                         if (e == null) {
-                            tt.cancel();
-                            t.cancel();
                             finish();
                         }
                     }
@@ -249,7 +249,7 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
         tt = new TimerTask() {
             @Override
             public void run() {
-                Log.v("here", "çalışıyorum");
+                //Log.v("here", "çalışıyorum");
 
                 ParseQuery<ParseObject> uberRequestQuery = ParseQuery.getQuery("RequestCar");
                 uberRequestQuery.whereEqualTo("username", ParseUser.getCurrentUser().getUsername());

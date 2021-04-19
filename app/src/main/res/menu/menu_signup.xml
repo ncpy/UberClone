@@ -8,4 +8,11 @@
         android:orderInCategory="100"
         app:showAsAction="always" />
 
+    <item
+        android:id="@+id/info_item"
+        android:checkable="false"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:title="@android:string/status_bar_notification_info_overflow"
+        app:showAsAction="ifRoom" />
+
 </menu>

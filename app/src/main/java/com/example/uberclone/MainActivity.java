@@ -1,8 +1,11 @@
 package com.example.uberclone;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.material.navigation.NavigationView;
 import com.parse.LogInCallback;
 import com.parse.ParseAnonymousUtils;
 import com.parse.ParseException;
@@ -12,9 +15,11 @@ import com.parse.SaveCallback;
 import com.parse.SignUpCallback;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,12 +29,18 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
+import java.util.Objects;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     enum State {
         SIGNUP, LOGIN
     }
+
+    DrawerLayout drawerLayout;
+    NavigationView navView;
+    ActionBarDrawerToggle actionBarDrawerToggle;
 
     private State state;
     private Button btnSignUpLogin, btnOneTimeLogin;
@@ -44,8 +55,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ParseInstallation.getCurrentInstallation().saveInBackground();
         if (ParseUser.getCurrentUser() != null) {
             transitionToActivity();
-            //ParseUser.logOut();
         }
+
+
+        drawerLayout = findViewById(R.id.drawerlayout);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.open, R.string.close);
+        drawerLayout.addDrawerListener(actionBarDrawerToggle);
+        actionBarDrawerToggle.syncState();
+
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+
+        navView = findViewById(R.id.navView);
+        navView.setItemIconTintList(null);
+        navView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                if (item.getItemId() == R.id.item_send_us) {
+                    Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                    emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{"ncpyolcu@gmail.com"});
+                    emailIntent.setType("text/html");
+                    emailIntent.setPackage("com.google.android.gm");
+                    startActivity(Intent.createChooser(emailIntent, "Send e-mail"));
+                }
+                else if (item.getItemId() == R.id.item_share) {
+                    Intent share = new Intent(Intent.ACTION_SEND);
+                    share.setType("text/plain");
+                    share.putExtra(Intent.EXTRA_TEXT, "Hi"); // (googlePlay)
+                    startActivity(Intent.createChooser(share, "Share this !! "));
+                }
+                else if (item.getItemId() == R.id.item_rate) {
+                    Toast.makeText(getApplicationContext(), "..to Google Play", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            }
+        });
+
 
         btnSignUpLogin = findViewById(R.id.btn_signup);
         btnSignUpLogin.setOnClickListener(this);
@@ -57,11 +101,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         edtUserName = findViewById(R.id.ed_username);
         edtPassword = findViewById(R.id.ed_password);
+        edtPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
         edtDriverOrPassenger = findViewById(R.id.ed_D_P);
 
         state = State.SIGNUP;
         btnSignUpLogin.setBackgroundColor(Color.GREEN);
-
 
     }
 
@@ -89,10 +133,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         appUser.put("as", "Passenger");
 
 
-
-                    /**
-                     * driver veya passenger olarak login yapılan kullanıcının farklı olan driver/pasng olarak giriş yapması engellenmeli değil mi?
-                      */
                     appUser.signUpInBackground(new SignUpCallback() {
                         @Override
                         public void done(ParseException e) {
@@ -102,6 +142,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             }
                         }
                     });
+
+                    if (!appUser.isAuthenticated()) {
+                        Toast.makeText(this, "Try to Login!", Toast.LENGTH_SHORT).show();
+                    }
+
                 } else if (state == State.LOGIN) {
                     if (edtUserName.getText().toString().equals("") || edtPassword.getText().toString().equals("")) {
                         Toast.makeText(this, "Please fill the blanks area", Toast.LENGTH_SHORT).show();
@@ -113,9 +158,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             if (user != null && e == null) {
                                 Toast.makeText(MainActivity.this, "Logged In", Toast.LENGTH_SHORT).show();
                                 transitionToActivity();
+                            } else {
+                                Toast.makeText(MainActivity.this, "Try to Sign up!", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
+
+
                 }
                 break;
             }
@@ -156,26 +205,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.loginItem:
-                if (state == State.SIGNUP) {
-                    state = State.LOGIN;
-                    item.setTitle("Sign Up");
-                    btnSignUpLogin.setText("Log In");
-                    btnSignUpLogin.setBackgroundColor(Color.YELLOW);
-                    driverRadioButton.setEnabled(false);
-                    passengerRadioButton.setEnabled(false);
+        if (item.getItemId() == R.id.loginItem) {
+            if (state == State.SIGNUP) {
+                state = State.LOGIN;
+                item.setTitle("Sign Up");
+                btnSignUpLogin.setText("Log In");
+                btnSignUpLogin.setBackgroundColor(Color.YELLOW);
+                driverRadioButton.setEnabled(false);
+                passengerRadioButton.setEnabled(false);
 
-                } else if (state == State.LOGIN) {
-                    state = State.SIGNUP;
-                    item.setTitle("Log In");
-                    btnSignUpLogin.setText("Sign Up");
-                    btnSignUpLogin.setBackgroundColor(Color.GREEN);
-                    driverRadioButton.setEnabled(true);
-                    passengerRadioButton.setEnabled(true);
-                }
+            } else if (state == State.LOGIN) {
+                state = State.SIGNUP;
+                item.setTitle("Log In");
+                btnSignUpLogin.setText("Sign Up");
+                btnSignUpLogin.setBackgroundColor(Color.GREEN);
+                driverRadioButton.setEnabled(true);
+                passengerRadioButton.setEnabled(true);
+            }
+        } else if (item.getItemId() == R.id.info_item) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.app_name);
+            builder.setMessage("Version: " + BuildConfig.VERSION_NAME);
+            AlertDialog dialog = builder.create();
+            dialog.show();
 
-                break;
+        } else if (actionBarDrawerToggle.onOptionsItemSelected(item)) {
+            hideKeyboard();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -183,16 +239,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void transitionToActivity() {
         if (ParseUser.getCurrentUser() != null) {
-            if (ParseUser.getCurrentUser().get("as").equals("Passenger")) {
+            if (Objects.equals(ParseUser.getCurrentUser().get("as"), "Passenger")) {
                 startActivity(new Intent(MainActivity.this, PassengerActivity_Map.class));
             }
-            else if (ParseUser.getCurrentUser().get("as").equals("Driver")) {
+            else if (Objects.equals(ParseUser.getCurrentUser().get("as"), "Driver")) {
                 startActivity(new Intent(MainActivity.this, DriverRequestListActivity.class));
             }
         }
     }
 
     public void constraintKeyboard(View v) {
+        hideKeyboard();
+    }
+
+    private void hideKeyboard() {
         try {
             InputMethodManager iMM = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             iMM.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);

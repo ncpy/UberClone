@@ -5,4 +5,8 @@
     <string name="cancel_uber_order">Cancel your Uber Order!</string>
     <string name="request_uber">Request an Uber</string>
     <string name="title_activity_view_locations_map5">Map</string>
+
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+
 </resources>
