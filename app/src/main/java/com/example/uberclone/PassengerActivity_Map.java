@@ -20,7 +20,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -41,6 +40,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
+import com.shashank.sony.fancytoastlib.FancyToast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,25 +102,7 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
         mMap = googleMap;
 
         locationManager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(@NonNull Location location) {
-                updateCameraPassengerLocation(location);
-                Log.i("here car ready:", isCarReady+"");
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
-
-            @Override
-            public void onProviderEnabled(@NonNull String provider) {
-            }
-
-            @Override
-            public void onProviderDisabled(@NonNull String provider) {
-            }
-        };
+        initializeLocationListener();
 
         if (Build.VERSION.SDK_INT < 23) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -136,7 +118,11 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
 
                 Location currentPassengerLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                updateCameraPassengerLocation(currentPassengerLocation);
+                try {
+                    updateCameraPassengerLocation(currentPassengerLocation);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -149,6 +135,7 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
+            initializeLocationListener();
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
         }
     }
@@ -185,7 +172,7 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
                                 @Override
                                 public void done(ParseException e) {
                                     if (e == null) {
-                                        Toast.makeText(PassengerActivity_Map.this, "A car request is sent.", Toast.LENGTH_SHORT).show();
+                                        FancyToast.makeText(PassengerActivity_Map.this, "A car request is sent.", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
                                         btnRequestCar.setText(R.string.cancel_uber_order);
                                         isUberCancelled = false;
                                         getDriverUpdates();
@@ -194,7 +181,7 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
                             });
 
                         } else {
-                            Toast.makeText(this, "Unknown Error. Something went wrong!!!", Toast.LENGTH_SHORT).show();
+                            FancyToast.makeText(PassengerActivity_Map.this, "Unknown Error. Something went wrong!!!", FancyToast.LENGTH_SHORT, FancyToast.ERROR, false).show();
                         }
                     }
                 } else { // means cancel the order
@@ -217,7 +204,7 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
                                             if (e == null) {
                                                 tt.cancel();
                                                 t.cancel();
-                                                Toast.makeText(PassengerActivity_Map.this, "Request is deleted!", Toast.LENGTH_SHORT).show();
+                                                FancyToast.makeText(PassengerActivity_Map.this, "Request is deleted!", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
                                             }
                                         }
                                     });
@@ -229,9 +216,13 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
                 break;
             }
             case R.id.btnLogOutFromPassenger: {
-                tt.cancel();
-                t.cancel();
-                Toast.makeText(PassengerActivity_Map.this, ParseUser.getCurrentUser().getUsername() + " is logged out!", Toast.LENGTH_SHORT).show();
+                try {
+                    tt.cancel();
+                    t.cancel();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                FancyToast.makeText(PassengerActivity_Map.this, ParseUser.getCurrentUser().getUsername() + " is logged out!", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
                 ParseUser.logOutInBackground(new LogOutCallback() {
                     @Override
                     public void done(ParseException e) {
@@ -242,6 +233,28 @@ public class PassengerActivity_Map extends FragmentActivity implements OnMapRead
                 });
             }
         }
+    }
+
+    private void initializeLocationListener() {
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(@NonNull Location location) {
+                updateCameraPassengerLocation(location);
+                Log.i("here car ready:", isCarReady+"");
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            }
+
+            @Override
+            public void onProviderEnabled(@NonNull String provider) {
+            }
+
+            @Override
+            public void onProviderDisabled(@NonNull String provider) {
+            }
+        };
     }
 
     private void getDriverUpdates() {

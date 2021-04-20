@@ -24,22 +24,48 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/uber_taxi" />
 
-        <EditText
-            android:id="@+id/ed_username"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/imageView"
-            android:hint="Please enter your username.." />
 
-        <EditText
-            android:id="@+id/ed_password"
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tx_inp_lay_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="Please enter your password.."
-            android:inputType="textPassword"
-            app:layout_constraintTop_toBottomOf="@+id/ed_username"
-            tools:layout_editor_absoluteX="10dp" />
+            app:boxBackgroundColor="#FFFFFF"
+            app:layout_constraintTop_toBottomOf="@+id/imageView" >
+
+            <EditText
+                android:id="@+id/ed_username"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/imageView"
+                android:hint="Please enter your username.." />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tx_inp_lay_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:boxBackgroundColor="#FFFFFF"
+            app:layout_constraintTop_toBottomOf="@+id/tx_inp_lay_1"
+            app:passwordToggleTint="@color/black"
+            app:passwordToggleDrawable="@drawable/show_password_selector"
+            app:passwordToggleEnabled="true"
+            tools:layout_editor_absoluteX="10dp">
+
+            <EditText
+                android:id="@+id/ed_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Please enter your password.."
+                android:inputType="textPassword"
+                app:endIconMode="password_toggle"
+                tools:layout_editor_absoluteX="10dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
 
         <RadioGroup
             android:id="@+id/rd_grp"
@@ -49,7 +75,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ed_password">
+            app:layout_constraintTop_toBottomOf="@+id/tx_inp_lay_2">
 
             <RadioButton
                 android:id="@+id/rd_btn_psg"
@@ -69,7 +95,7 @@
             android:id="@+id/btn_signup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sign Up"
+            android:text="SIGN UP"
             android:textColor="@color/black"
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -86,23 +112,34 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/btn_signup" />
 
-        <EditText
-            android:id="@+id/ed_D_P"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tx_inp_lay_3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Type 'Driver' or 'Passenger' for Guest Login"
+            app:boxBackgroundColor="#FFFFFF"
             android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/tx_1" />
+            app:layout_constraintTop_toBottomOf="@+id/tx_1" >
+
+            <EditText
+                android:id="@+id/ed_D_P"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Type 'Driver' or 'Passenger' for Guest Login" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
 
         <Button
             android:id="@+id/btn_onetime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="One Time Login"
+            android:text="ONE TIME LOGIN"
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ed_D_P" />
+            app:layout_constraintTop_toBottomOf="@+id/tx_inp_lay_3" />
+
+
 
 
 

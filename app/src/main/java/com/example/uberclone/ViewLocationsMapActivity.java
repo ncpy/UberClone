@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -24,6 +23,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
+import com.shashank.sony.fancytoastlib.FancyToast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class ViewLocationsMapActivity extends FragmentActivity implements OnMapR
         btn_give_ride.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(ViewLocationsMapActivity.this, getIntent().getStringExtra("rUsername"), Toast.LENGTH_SHORT).show();
+                FancyToast.makeText(ViewLocationsMapActivity.this, getIntent().getStringExtra("rUsername"), FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
                 ParseQuery<ParseObject> carRequestQuery = ParseQuery.getQuery("RequestCar");
                 carRequestQuery.whereEqualTo("username", getIntent().getStringExtra("rUsername"));
                 carRequestQuery.findInBackground(new FindCallback<ParseObject>() {

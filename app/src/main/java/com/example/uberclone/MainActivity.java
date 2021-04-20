@@ -13,13 +13,13 @@ import com.parse.ParseInstallation;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.parse.SignUpCallback;
+import com.shashank.sony.fancytoastlib.FancyToast;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.text.method.PasswordTransformationMethod;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,7 +27,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
-import android.widget.Toast;
 
 import java.util.Objects;
 
@@ -84,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     startActivity(Intent.createChooser(share, "Share this !! "));
                 }
                 else if (item.getItemId() == R.id.item_rate) {
-                    Toast.makeText(getApplicationContext(), "..to Google Play", Toast.LENGTH_SHORT).show();
+                    FancyToast.makeText(getApplicationContext(), "..to Google Play", FancyToast.LENGTH_SHORT, FancyToast.INFO, false).show();
                 }
                 return true;
             }
@@ -101,7 +100,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         edtUserName = findViewById(R.id.ed_username);
         edtPassword = findViewById(R.id.ed_password);
-        edtPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
         edtDriverOrPassenger = findViewById(R.id.ed_D_P);
 
         state = State.SIGNUP;
@@ -116,12 +114,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btn_signup: {
                 if (state == State.SIGNUP) {
                     if (!driverRadioButton.isChecked() && !passengerRadioButton.isChecked()) {
-                        Toast.makeText(this, "Are you a driver or a passenger?", Toast.LENGTH_SHORT).show();
+                        FancyToast.makeText(this, "Are you a driver or a passenger?", FancyToast.LENGTH_SHORT, FancyToast.WARNING, false).show();
                         return;
                     }
 
                     if (edtUserName.getText().toString().equals("") || edtPassword.getText().toString().equals("")) {
-                        Toast.makeText(this, "Please fill the blanks area", Toast.LENGTH_SHORT).show();
+                        FancyToast.makeText(this, "Please fill the blanks area", FancyToast.LENGTH_SHORT, FancyToast.WARNING, false).show();
                     }
 
                     ParseUser appUser = new ParseUser();
@@ -137,29 +135,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         @Override
                         public void done(ParseException e) {
                             if (e == null) {
-                                Toast.makeText(MainActivity.this, "Signed Up!", Toast.LENGTH_SHORT).show();
+                                FancyToast.makeText(MainActivity.this, "Signed Up!", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
                                 transitionToActivity();
+                            } else {
+                                FancyToast.makeText(MainActivity.this, "Try to Login!", FancyToast.LENGTH_SHORT, FancyToast.ERROR, false).show();
                             }
                         }
                     });
 
-                    if (!appUser.isAuthenticated()) {
-                        Toast.makeText(this, "Try to Login!", Toast.LENGTH_SHORT).show();
-                    }
 
                 } else if (state == State.LOGIN) {
                     if (edtUserName.getText().toString().equals("") || edtPassword.getText().toString().equals("")) {
-                        Toast.makeText(this, "Please fill the blanks area", Toast.LENGTH_SHORT).show();
+                        FancyToast.makeText(MainActivity.this, "Please fill the blanks area", FancyToast.LENGTH_SHORT, FancyToast.WARNING, false).show();
                     }
 
                     ParseUser.logInInBackground(edtUserName.getText().toString(), edtPassword.getText().toString(), new LogInCallback() {
                         @Override
                         public void done(ParseUser user, ParseException e) {
                             if (user != null && e == null) {
-                                Toast.makeText(MainActivity.this, "Logged In", Toast.LENGTH_SHORT).show();
+                                FancyToast.makeText(MainActivity.this, "Logged In", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
                                 transitionToActivity();
                             } else {
-                                Toast.makeText(MainActivity.this, "Try to Sign up!", Toast.LENGTH_SHORT).show();
+                                FancyToast.makeText(MainActivity.this, "Try to Sign up!", FancyToast.LENGTH_SHORT, FancyToast.ERROR, false).show();
                             }
                         }
                     });
@@ -175,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             @Override
                             public void done(ParseUser user, ParseException e) {
                                 if (user != null && e == null) {
-                                    Toast.makeText(MainActivity.this, "We have an Anonymous User", Toast.LENGTH_SHORT).show();
+                                    FancyToast.makeText(MainActivity.this, "We have an Anonymous User", FancyToast.LENGTH_SHORT, FancyToast.SUCCESS, false).show();
 
                                     user.put("as", edtDriverOrPassenger.getText().toString());
                                     user.saveInBackground(new SaveCallback() {
@@ -185,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         }
                                     });
                                 } else {
-                                    Toast.makeText(MainActivity.this, "Error: " + e, Toast.LENGTH_SHORT).show();
+                                    FancyToast.makeText(MainActivity.this, "Error: " + e, FancyToast.LENGTH_SHORT, FancyToast.ERROR, false).show();
                                 }
                             }
                         });
@@ -208,16 +205,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (item.getItemId() == R.id.loginItem) {
             if (state == State.SIGNUP) {
                 state = State.LOGIN;
-                item.setTitle("Sign Up");
-                btnSignUpLogin.setText("Log In");
+                item.setTitle("SIGN UP");
+                btnSignUpLogin.setText("LOG IN");
                 btnSignUpLogin.setBackgroundColor(Color.YELLOW);
                 driverRadioButton.setEnabled(false);
                 passengerRadioButton.setEnabled(false);
 
             } else if (state == State.LOGIN) {
                 state = State.SIGNUP;
-                item.setTitle("Log In");
-                btnSignUpLogin.setText("Sign Up");
+                item.setTitle("LOG IN");
+                btnSignUpLogin.setText("SIGN UP");
                 btnSignUpLogin.setBackgroundColor(Color.GREEN);
                 driverRadioButton.setEnabled(true);
                 passengerRadioButton.setEnabled(true);

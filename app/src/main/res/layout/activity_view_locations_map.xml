@@ -19,7 +19,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:paddingBottom="10dp"
-        android:text="Give this passengere a ride" />
+        android:layout_marginBottom="20dp"
+        android:backgroundTint="#009688"
+        android:text="Give this passenger a ride" />
 
 </RelativeLayout>
